@@ -1,0 +1,71 @@
+---
+- name: Install Jenkins & Docker
+  hosts: servers
+  gather_facts: No
+  remote_user: root
+  
+  tasks:
+   - name: Install Java
+     yum:
+      name: java-1.8.0-openjdk
+      state: latest
+   - name: Install Git
+     yum:
+        name: git
+        state: latest
+   - name: Install Texlive-latex
+     yum:
+        name: texlive-latex
+        state: latest
+   - name: Install Wget
+     yum:
+        name: wget
+        state: latest
+   - name: Install Deltarpm
+     yum:
+        name: deltarpm
+        state: latest     
+   - name: Add Jenkins repo
+     get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+   - name: Import Jenkins CI key
+     rpm_key:
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+        state: present     
+   - name: Install Jenkins
+     package:
+        name: jenkins
+        state: latest
+   - name: Allow port 8080
+     shell: iptables -I INPUT -p tcp --dport 8080 -m state --state NEW,ESTABLISHED -j ACCEPT     
+   - name: Start Jenkins
+     service:
+        name: jenkins
+        state: started
+        enabled: yes
+   - name: Install yum utils
+     yum:
+      name: yum-utils
+      state: latest
+   - name: Install device-mapper-persistent-data
+     yum:
+        name: device-mapper-persistent-data
+        state: latest
+   - name: Install lvm2
+      yum:
+        name: lvm2
+        state: latest
+   - name: Add Docker repo
+      get_url:
+        url: https://download.docker.com/linux/centos/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+   - name: Install Docker
+      package:
+        name: docker-ce
+        state: latest
+   - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
